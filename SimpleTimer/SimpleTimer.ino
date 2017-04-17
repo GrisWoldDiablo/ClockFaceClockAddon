@@ -53,7 +53,15 @@ bool diplayOnOff = true;	// Display On or Off, TRUE = ON, FALSE = OFF
 
 int locX = 32, locY = 32;	// Clock location on display
 
+// Counter used for when a button is held down.
+long heldTime = 2000;	// Default 2 seconds button held down, count milliseconds
+long timeHeld = 0;	// Used for counting
+bool startCounting = true;	// Start the counter to change window
 
+// Timer variables
+int hA = 12, mA = 0, sA = 0; // h:Hours, m:Minutes, s:Seconds
+String timerText;	// Text variable for Timer
+bool changeToTimer = false; // Check if its time to change to timer, TRUE = Change, FALSE = Keep counting
 
 
 
@@ -86,14 +94,50 @@ void loop()
 	}
 
 	arduboy.clear();
+
+	// Calculate time and store it.
 	clock();
+	
+	// Exit loop function if screen should be OFF
+	ShowDisplay();
+	if (!diplayOnOff)
+	{
+		return;
+	}
+
+	if (arduboy.pressed(DOWN_BUTTON) && SingleButton("DOWN"))
+	{
+		
+		if (millis() >= timeHeld && !startCounting)
+		{
+			changeToTimer = true;
+			timeHeld = 0;
+			arduboy.digitalWriteRGB(RGB_ON, RGB_OFF, RGB_OFF);
+		}
+		if (startCounting)
+		{
+			timeHeld = millis() + heldTime;
+			startCounting = false;
+			arduboy.digitalWriteRGB(RGB_OFF, RGB_ON, RGB_OFF);
+		}
+		
+	}
+	if (arduboy.notPressed(DOWN_BUTTON))
+	{
+		startCounting = true;
+		arduboy.digitalWriteRGB(RGB_OFF, RGB_OFF, RGB_OFF);
+	}
+
+
+	AdjustTime();
+
+	DisplayTime();
 
 
 	arduboy.display();
-
-
 }
 
+// Calculate time and store it.
 void clock()
 {
 
@@ -134,24 +178,32 @@ void clock()
 		ampm = true;
 	}
 
+	
+	
+
+}
+
+// Display On or Off, TRUE = ON, FALSE = OFF
+void ShowDisplay()
+{
 	// Press LEFT and RIGHT to turn screen OFF, clock still run in the background.
 	if (arduboy.pressed(LEFT_BUTTON) && arduboy.pressed(RIGHT_BUTTON) && arduboy.notPressed(A_BUTTON) && arduboy.notPressed(B_BUTTON) && arduboy.notPressed(UP_BUTTON) && arduboy.notPressed(DOWN_BUTTON))
 	{
-		diplayOnOff = false;
 		arduboy.clear();
 		arduboy.display();
+		diplayOnOff = false;
+
 	}
 	// Press UP and DOWN to turn screen ON and display clock.
 	else if (arduboy.pressed(UP_BUTTON) && arduboy.pressed(DOWN_BUTTON) && arduboy.notPressed(A_BUTTON) && arduboy.notPressed(B_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
 	{
 		diplayOnOff = true;
 	}
-	// Exit loop function if screen should be OFF
-	if (!diplayOnOff)
-	{
-		return;
-	}
+}
 
+// Modify time with buttons press
+void AdjustTime()
+{
 	// Set clock to a 12h or 24h type
 	if (clockType)
 	{
@@ -226,23 +278,6 @@ void clock()
 	{
 		SecondTurn(false);
 	}
-
-	// Select clock type to display
-	if (clockType)
-	{
-		clockTypeText = "12h";
-	}
-	else
-	{
-		clockTypeText = "24h";
-	}
-	
-	arduboy.setCursor(0, 0);	// Print clock type top left corner
-	arduboy.print(clockTypeText);
-
-	arduboy.setCursor(locX, locY);	// Set location for clock
-	clockText = CreateDisplayText();
-	arduboy.print(clockText); // Print clock
 }
 
 // Swap AM/PM depending of how it start
@@ -341,6 +376,28 @@ void SecondTurn(bool changeS)
 	}
 }
 
+//  Display the clock on screen
+void DisplayTime()
+{
+	// Select clock type to display
+	if (clockType)
+	{
+		clockTypeText = "12h";
+	}
+	else
+	{
+		clockTypeText = "24h";
+	}
+
+	arduboy.setCursor(0, 0);	// Print clock type top left corner
+	arduboy.print(clockTypeText);
+
+	arduboy.setCursor(locX, locY);	// Set location for clock
+	clockText = CreateDisplayText();
+	arduboy.print(clockText); // Print clock
+}
+
+// Combine necessary strings to present the time.
 String CreateDisplayText()
 {
 	// Seconds diplay as 01 instead of 1
@@ -390,4 +447,53 @@ String CreateDisplayText()
 	
 	return hourD + h + clockS + minD + m + clockS + secD + s + ampmText;	// Create clock string
 }
+
+// Isolate a button, return true when all the other button are not press except the one you've chosen
+boolean SingleButton(String chosenButton)
+{
+	if (chosenButton == "A")
+	{
+		if (arduboy.notPressed(B_BUTTON) && arduboy.notPressed(UP_BUTTON) && arduboy.notPressed(DOWN_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
+		{
+			return true;
+		}
+	}
+	else if (chosenButton == "B")
+	{
+		if (arduboy.notPressed(A_BUTTON) && arduboy.notPressed(UP_BUTTON) && arduboy.notPressed(DOWN_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
+		{
+			return true;
+		}
+	}
+	else if (chosenButton == "UP")
+	{
+		if (arduboy.notPressed(B_BUTTON) && arduboy.notPressed(A_BUTTON) && arduboy.notPressed(DOWN_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
+		{
+			return true;
+		}
+	}
+	else if (chosenButton == "DOWN")
+	{
+		if (arduboy.notPressed(B_BUTTON) && arduboy.notPressed(UP_BUTTON) && arduboy.notPressed(A_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
+		{
+			return true;
+		}
+	}
+	else if (chosenButton == "LEFT")
+	{
+		if (arduboy.notPressed(B_BUTTON) && arduboy.notPressed(UP_BUTTON) && arduboy.notPressed(DOWN_BUTTON) && arduboy.notPressed(A_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
+		{
+			return true;
+		}
+	}
+	else if (chosenButton == "RIGHT")
+	{
+		if (arduboy.notPressed(B_BUTTON) && arduboy.notPressed(UP_BUTTON) && arduboy.notPressed(DOWN_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(A_BUTTON))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
