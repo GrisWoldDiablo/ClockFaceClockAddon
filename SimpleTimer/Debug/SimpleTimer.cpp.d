@@ -21,4 +21,5 @@ C:\Users\grisw\AppData\Local\Temp\VMBuilds\SimpleTimer\arduboy_arduboy_avr_ardub
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Sprites.h \
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
- C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2Audio.h
+ C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2Audio.h \
+ C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\ArduboyPlaytune\src/ArduboyPlaytune.h
