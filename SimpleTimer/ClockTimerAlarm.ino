@@ -444,24 +444,24 @@ int * AdjustTime(int sAA, int mAA, int hAA, bool ClockOrAlarm, bool SetTimer)
 				}
 
 			}
-			else
+			else if (hAv != 0)
 			{
 				if (ClockOrAlarm)
 				{
 					ampm = true;
 				}
-				else if (hA < 12)
+				else if (h < 12)
 				{
-					ampmA = true;
+					ampm = true;
 				}
 
 				if (!ClockOrAlarm)
 				{
 					ampmA = true;
 				}	
-				else if (h < 12)
+				else if (hA < 12)
 				{
-					ampm = true;
+					ampmA = true;
 				}
 			}
 			if (hAv == 0)
@@ -470,18 +470,18 @@ int * AdjustTime(int sAA, int mAA, int hAA, bool ClockOrAlarm, bool SetTimer)
 				{
 					hAv = 12;
 				}
-				else if (hA == 0)
+				else if (h == 0)
 				{
-					hA = 12;
+					h = 12;
 				}
 
 				if (!ClockOrAlarm)
 				{
 					hAv = 12;
 				}
-				else if (h == 0)
+				else if (hA == 0)
 				{
-					h = 12;
+					hA = 12;
 				}
 			}
 		}
