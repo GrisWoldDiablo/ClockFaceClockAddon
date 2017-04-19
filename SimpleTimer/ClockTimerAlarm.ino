@@ -1,10 +1,15 @@
 
 
 /*
-Simple Clock 12h or 24h
-Version : 1.0,  April 15, 2017
+Clock Alarm Timer 12h or 24h
+Version : 2.0,  April 18, 2017
 Author: GrisWold Diablo
 Twitter: @GrisWoldDiablo
+
+NOTES:
+Feel free to use this code, no need to give me credit.
+
+APPLICATION CONTROL INFORMATION
 
 SCREEN:
 Press LEFT and RIGHT to turn screen OFF, clock still run in the background.
@@ -19,11 +24,20 @@ Hours: hold A, press UP or DOWN
 Minutes: hold B, press UP or DOWN
 Seconds: hold A and B, press UP or DOWN
 
+ALARM SETTING:
+Hold DOWN from the main screen to enter Alarm setting window.
+Hold LEFT to turn the Alarm ON
+Tap LEFT or RIGHT to turn the Alarm music off while its playing.
+
+TIMER SETTING:
+Hold UP from the main screen to enter Timer setting window.
+Hold RIGHT to turn the Timer ON
+Tap LEFT or RIGHT to turn the Timer music off while its playing.
+
 PAUSE CLOCK:
 Pause clock hold A and B, Only works with screen ON
 
-NOTES:
-Feel free to use this code, no need to give me credit.
+
 */
 
 #include <Arduboy2.h>
@@ -46,7 +60,6 @@ String minD = "0";	// Make minutes diplay as 01 instead of 1
 String hourD = " ";	// Add space in front of hour to center display
 
 bool clockType = true;	// 12 or 24 hour clock type, TRUE = 12h AM/PM, FALSE = 24h 
-int clockTypeVar;	// Either 12 or 24, variable for clock type calculation
 String clockTypeText; // Display 12h or 24h depending of clock type
 bool ampm = true;	// Used if clock type set to 12h, TRUE = AM, FALSE = PM
 String ampmText = " AM";	// Show AM or PM to clock display
@@ -234,20 +247,20 @@ void loop()
 	if (sA == s && mA == m && hA == h && ampmA == ampm && alarmOnSetting)
 	{
 		ardtune.playScore(score);
+		alarmOnSetting = false;
 	}
 	
 	
 	
 	// Exit loop function if screen should be OFF
 	ShowDisplay();
-
-	HeldLeftButton();
-	HeldRightButton();
-
 	if (!diplayOnOff)
 	{
 		return;
 	}
+	
+	HeldLeftButton();
+	HeldRightButton();
 
 	if (HeldDownButton() || alarmSetting)
 	{
@@ -296,20 +309,20 @@ void clock()
 		h++;
 	}
 	// Turn over clock 
-	if (h == clockTypeVar && m == 0 && s == 0 && !clockType && sc == frameRate)
+	if (h == 24 && m == 0 && s == 0 && !clockType && sc == frameRate)
 	{
 		h = 0;
 		ampm = true;
 	}
-	else if (h == clockTypeVar && m == 0 && s == 0 && clockType && ampm && sc == frameRate)
+	else if (h == 11 && m == 59 && s == 59 && clockType && ampm && sc == frameRate)
 	{
 		ampm = false;
 	}
-	else if (h == clockTypeVar && m == 0 && s == 0 && clockType && !ampm && sc == frameRate)
+	else if (h == 11 && m == 59 && s == 59 && clockType && !ampm && sc == frameRate)
 	{
 		ampm = true;
 	}
-	if (h > clockTypeVar && m == 0 && s == 0 && clockType /*&& sc == frameRate*/)
+	if (h > 12 && m == 0 && s == 0 && clockType)
 	{
 		h = 1;
 	}
@@ -328,12 +341,18 @@ void ShowDisplay()
 	{
 		arduboy.clear();
 		arduboy.display();
+		arduboy.digitalWriteRGB(RGB_OFF, RGB_OFF, RGB_OFF);
 		diplayOnOff = false;
+		startCounting = true;
+		alarmSetting = false;
+		timerSetting = false;
+		
 
 	}
 	// Press UP and DOWN to turn screen ON and display clock.
 	else if (arduboy.pressed(UP_BUTTON) && arduboy.pressed(DOWN_BUTTON) && arduboy.notPressed(A_BUTTON) && arduboy.notPressed(B_BUTTON) && arduboy.notPressed(LEFT_BUTTON) && arduboy.notPressed(RIGHT_BUTTON))
 	{
+		arduboy.digitalWriteRGB(RGB_OFF, RGB_OFF, RGB_OFF);
 		diplayOnOff = true;
 	}
 }
@@ -346,17 +365,6 @@ int * AdjustTime(int sAA, int mAA, int hAA, bool ClockOrAlarm, bool SetTimer)
 	hAv = hAA;
 	static int adjT[3];
 	
-
-	// Set clock to a 12h or 24h type
-	if (clockType)
-	{
-		clockTypeVar = 12;
-	}
-	else
-	{
-		clockTypeVar = 24;
-	}
-
 	// Disable changing clocktype if your are setting up Timer.
 	if (!SetTimer)
 	{
@@ -1035,6 +1043,7 @@ void DisplayTimer()
 	arduboy.print(CreateDisplayText(sT, mT, hT, false, true));
 }
 
+// If 'timerOnSetting' is TRUE the time will start counting down.
 void TimerCountDown()
 {
 	sT--;
