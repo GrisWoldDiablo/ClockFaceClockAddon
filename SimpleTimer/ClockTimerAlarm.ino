@@ -11,9 +11,14 @@ Feel free to use this code, no need to give me credit.
 
 APPLICATION CONTROL INFORMATION
 
+MAIN SCREEN:
+Press UP or DOWN to cycle between screens
+Bottom left show Alarm time
+Bottom right show Timer time
+
 SCREEN:
-Press LEFT and RIGHT to turn screen OFF, clock still run in the background.
-Press UP and DOWN to turn screen ON.
+Press LEFT and RIGHT to turn screen OFF, clock still run in the background
+Press UP and DOWN to turn screen ON
 
 12H or 24H:
 Press LEFT and DOWN to set clock type to 12h AM/PM (Default)
@@ -25,14 +30,13 @@ Minutes: hold B, press UP or DOWN
 Seconds: hold A and B, press UP or DOWN
 
 ALARM SETTING:
-Hold DOWN from the main screen to enter Alarm setting window.
 Hold LEFT to turn the Alarm ON
-Tap LEFT or RIGHT to turn the Alarm music off while its playing.
+Tap LEFT or RIGHT to turn the Alarm music off while its playing
 
 TIMER SETTING:
-Hold UP from the main screen to enter Timer setting window.
 Hold RIGHT to turn the Timer ON
-Tap LEFT or RIGHT to turn the Timer music off while its playing.
+Tap LEFT to reset the Timer while its not running
+Tap LEFT or RIGHT to turn the Timer music off while its playing
 
 PAUSE CLOCK:
 Pause clock hold A and B, Only works with screen ON
@@ -167,6 +171,7 @@ int hT = 0, mT = 0, sT = 0;	// Timer variables, hT:Hours, mT:Minutes, sT:Seconds
 String timerText;	// Text variable for Timer
 bool timerSetting = false; // Change to Timer setting window, TRUE = Display Timer
 bool timerOnSetting = false;	// Verify is timer is On or OFF, TRUE = Timer ON, FALSE - Timer OFF
+int hTS, mTS, sTS; // Variable Set for when you reset the timer
 
 // Return to Main screen
 long returnCountDown = 10000; // 10 Second count down
@@ -678,7 +683,7 @@ boolean AmPmSwap(bool ClockOrAlarm)
 // 'changeH' Increment(TRUE) or Decrement(FALSE) hours, 'ClockOrAlarm' TRUE=Setting Clock, FALSE=Setting Alarm, 'setTimer' TRUE=Setting Timer
 int HourTurn(bool changeH, bool ClockOrAlarm, bool setTimer)
 {
-	returnCount = millis() + returnCountDown; // Reset return to main screen countdown
+	ResetReturnCount(); // Reset return to main screen countdown
 	// Enter the increment section
 	if (changeH)
 	{
@@ -749,7 +754,7 @@ int HourTurn(bool changeH, bool ClockOrAlarm, bool setTimer)
 // 'changeM' Increment(TRUE) or Decrement(FALSE) minutes, 'ClockOrAlarm' TRUE=Setting Clock, FALSE=Setting Alarm, 'setTimer' TRUE=Setting Timer
 int MinuteTurn(bool changeM, bool ClockOrAlarm, bool setTimer)
 {
-	returnCount = millis() + returnCountDown; // Reset return to main screen countdown
+	ResetReturnCount(); // Reset return to main screen countdown
 	// Enter the increment section
 	if (changeM)
 	{
@@ -795,7 +800,7 @@ int MinuteTurn(bool changeM, bool ClockOrAlarm, bool setTimer)
 // 'changeS' Increment(TRUE) or Decrement(FALSE) seconds, 'ClockOrAlarm' TRUE=Setting Clock, FALSE=Setting Alarm, 'setTimer' TRUE=Setting Timer
 int SecondTurn(bool changeS, bool ClockOrAlarm, bool setTimer)
 {
-	returnCount = millis() + returnCountDown; // Reset return to main screen countdown
+	ResetReturnCount(); // Reset return to main screen countdown
 	// Enter the increment section
 	if (changeS)
 	{
@@ -1107,6 +1112,7 @@ boolean HeldLeftButton()
 	// Check if proper buttons has been pressed 
 	if (arduboy.pressed(LEFT_BUTTON) && SingleButton("LEFT"))
 	{
+		ResetReturnCount(); // Reset return to main screen countdown
 		// Check if music is playing
 		if (ardtune.playing())
 		{
@@ -1149,9 +1155,9 @@ boolean HeldLeftButton()
 		{
 			if (!timerOnSetting)
 			{
-				hT = 0;
-				mT = 0;
-				sT = 0;
+				sT = sTS;
+				mT = mTS;
+				hT = hTS;
 			}
 		}
 		
@@ -1170,6 +1176,7 @@ boolean HeldRightButton()
 	// Check if proper buttons has been pressed and the user is not at the main screen
 	if (arduboy.pressed(RIGHT_BUTTON) && SingleButton("RIGHT"))
 	{
+		ResetReturnCount(); // Reset return to main screen countdown
 		// Check if music is playing
 		if (ardtune.playing())
 		{
@@ -1194,6 +1201,9 @@ boolean HeldRightButton()
 				else
 				{
 					timerOnSetting = true;	// Start timer
+					sTS = sT;
+					mTS = mT;
+					hTS = hT;
 					//timerSetting = false;	// Exit Timer setting screen
 					return true;
 				}
@@ -1640,8 +1650,12 @@ void ResetButtonHeldCounter()
 	}
 	if (returnCounting)
 	{
-		returnCount = millis() + returnCountDown;	// Set the varible for the counter with how long button should be held as per 'heldTime'
+		ResetReturnCount();	// Set the varible for the counter with how long button should be held as per 'heldTime'
 		returnCounting = false;	// Set variable to indicate the countdown just started
 	}
 }
 
+void ResetReturnCount() 
+{
+	returnCount = millis() + returnCountDown;
+}
