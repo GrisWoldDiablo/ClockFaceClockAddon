@@ -22,4 +22,6 @@ C:\Users\grisw\AppData\Local\Temp\VMBuilds\ClockTimerAlarm\arduboy_arduboy_avr_a
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2Audio.h \
- C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\ArduboyPlaytune\src/ArduboyPlaytune.h
+ C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\ArduboyPlaytune\src/ArduboyPlaytune.h \
+ C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy-TinyFont\src/Tinyfont.h \
+ C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\ArdBitmap\src/ArdBitmap.h
