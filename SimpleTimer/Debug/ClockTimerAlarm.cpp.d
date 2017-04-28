@@ -17,7 +17,6 @@ C:\Users\grisw\AppData\Local\Temp\VMBuilds\ClockTimerAlarm\arduboy_arduboy_avr_a
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\EEPROM\src/EEPROM.h \
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2Core.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\SPI\src/SPI.h \
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Sprites.h \
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
