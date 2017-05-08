@@ -12,7 +12,7 @@ C:\Users\grisw\AppData\Local\Temp\VMBuilds\ClockTimerAlarm\arduboy_arduboy_avr_a
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/USBDesc.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/USBCore.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\variants\leonardo/pins_arduino.h \
+ C:\Users\grisw\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.18\variants\leonardo/pins_arduino.h \
  C:\Users\grisw\Desktop\Arduboy\ Projects\libraries\Arduboy2\src/Arduboy2.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\EEPROM\src/EEPROM.h \

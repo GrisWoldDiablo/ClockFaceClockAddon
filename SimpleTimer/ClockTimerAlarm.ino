@@ -297,8 +297,7 @@ const byte score[] PROGMEM = {
 	0xf0
 };
 
-// 1 PONG ADDON CODE
-
+// Screensaver / Pong
 int xDir = WIDTH / 2, yDir = HEIGHT / 2;
 int xMove = 1, yMove = 1;
 int xSpeed = 3, ySpeed = 3;
@@ -313,16 +312,19 @@ int p1Score = 0, p2Score = 0, p1Wins = 0, p2Wins = 0;
 bool screenSaverSetting = false;
 bool screenSaverType = true;	// TRUE = Blank, FALSE = Pong
 bool direction = true;
-// count down screen saver
+// count down screensaver
 bool PongScreenSaver = false;
 bool ssONOFF = false; // TRUE = Screen saver ON, FALSE = Screen saver OFF
 long ssCD = 0;
 long ssCDT = 30000; // 30 Seconds
 
-
-
-
-// 1 PONG ADDON CODE
+// Watch Face Type, Digital or Analog
+bool faceTypeSetting = false;
+bool faceType = false;
+/*
+long milliSecond = 100;
+long milliSecondCount = 100;
+int mils = 0;*/
 
 void setup()
 {
@@ -375,6 +377,17 @@ void loop()
 		
 		s++;	// Increase Second by 1
 	}
+	/*
+	if (millis() >= milliSecondCount)
+	{
+		milliSecondCount += milliSecond;
+		mils++;
+		if (mils == 10)
+		{
+			mils = 0;
+		}
+
+	}*/
 	
 
 	// Verify if its time for next frame if not exit the loop.
@@ -449,12 +462,16 @@ void loop()
 		arduboy.clear();	// Clear the display buffer
 		DisplayTimer();		// Call the function to show the Timer setting screen
 	}
-	// 3 PONG ADDON CODE
+	// Change to Screensaver setting screen
 	else if (screenSaverSetting)
 	{
 		DisplayPong();
 	}
-	// 3 PONG ADDON CODE
+	// Change to Face type setting screen
+	else if (faceTypeSetting)
+	{
+		DisplayFaceType();
+	}
 	// Show main Screen if no other Screen are called
 	else
 	{	
@@ -1100,7 +1117,7 @@ boolean SingleButton(String chosenButton)
 	{
 		buttonHeld = false;
 		returnCounting = true;
-		if (!alarmSetting && !timerSetting && !screenSaverSetting)
+		if (!alarmSetting && !timerSetting && !screenSaverSetting && !faceTypeSetting)
 		{
 			alarmSetting = true;
 		}
@@ -1117,6 +1134,11 @@ boolean SingleButton(String chosenButton)
 		else if (screenSaverSetting)
 		{
 			screenSaverSetting = false;
+			faceTypeSetting = true;
+		}
+		else if (faceTypeSetting)
+		{
+			faceTypeSetting = false;
 		}
 	}
 	// Check if no button has been pressed
@@ -1134,8 +1156,13 @@ boolean SingleButton(String chosenButton)
 	{
 		buttonHeld = false;
 		returnCounting = true;
-		if (!alarmSetting && !timerSetting && !screenSaverSetting)
+		if (!alarmSetting && !timerSetting && !screenSaverSetting && !faceTypeSetting)
 		{
+			faceTypeSetting = true;
+		}
+		else if (faceTypeSetting)
+		{
+			faceTypeSetting = false;
 			screenSaverSetting = true;
 		}
 		else if (screenSaverSetting)
@@ -1174,7 +1201,7 @@ boolean HeldLeftButton()
 		}
 
 		// Count if user is not at the Timer screen
-		if (!timerSetting && !screenSaverSetting || (screenSaverSetting && !screenSaverType))
+		if (!timerSetting && !screenSaverSetting && !faceTypeSetting || (screenSaverSetting && !screenSaverType))
 		{
 			// Check if proper time has past while the button is held
 			if (millis() >= timeHeld && !startCounting && buttonHeld)
@@ -1226,6 +1253,10 @@ boolean HeldLeftButton()
 			{
 				screenSaverType = false;
 			}
+			else if (faceTypeSetting)
+			{
+				faceType = false;
+			}
 		}
 		
 	}
@@ -1251,7 +1282,7 @@ boolean HeldRightButton()
 		}
 
 		// Count if user is not at the Alarm screen
-		if (!alarmSetting && !screenSaverSetting)
+		if (!alarmSetting && !screenSaverSetting && !faceTypeSetting)
 		{
 			// Check if proper time has past while the button is held
 			if (millis() >= timeHeld && !startCounting && buttonHeld)
@@ -1295,6 +1326,10 @@ boolean HeldRightButton()
 		{
 			screenSaverType = true;
 		}
+		else if (faceTypeSetting)
+		{
+			faceType = true;
+		}
 	}
 	// Check if no button has been pressed
 	if (NoButton())
@@ -1311,84 +1346,37 @@ void DisplayMain()
 	String timerClock;
 
 	DrawFrame();
-	ardTiny.setCursor(15, 2);
-	ardTiny.print("ALARM");
-	ardTiny.setCursor(90, 2);
-	ardTiny.print("TIMER");
-
-	// Display Timer if running
-	if (timerOnSetting)
-	{
-		arduboy.setCursor(74, 2);
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-	}
-	// Display how to access Timer screen
-	else
-	{
-		arduboy.setCursor(71, 2);
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
-	}
-
-	// Display Alarm if its ON
-	if (alarmOnSetting)
-	{
-		arduboy.setCursor(44, 2);
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-	}
-	// display how to access Alarm screen
-	else
-	{
-		arduboy.setCursor(41, 2);
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
-	}
 	
-
 	arrD = AdjustTime(s, m, h, true, false);	// Call funtion to change time if user choose to
 	s = *(arrD);	// Extract seconds from array as per previous function
 	m = *(arrD + 1);	// Extract minutes from array as per previous function
 	h = *(arrD + 2);	// Extract hours from array as per previous function
-	arduboy.setTextSize(2);	// Increase font size
-	arduboy.setCursor(17, 25);	// Set location for clock
-	clockText = CreateDisplayText(s, m, h, true, false, false);	// Add to display buffer by calling function to create the time text
-	arduboy.print(clockText); // Print clock
 	
-	ardTiny.setCursor(55, 13);
-	ardTiny.print("TIME");
-
+	
+	DrawClock();
+	
+	alarmClock = CreateDisplayText(sA, mA, hA, false, false, false);
 	if (clockType)
 	{
-		if (ampm)
-		{
-			arduboy.setCursor(59, 44); // +3 ON
-			arduboy.setTextSize(1);
-			arduboy.print("AM");
-		}
-		else
-		{
-			arduboy.setCursor(59, 44); // +3 ON
-			arduboy.setTextSize(1);
-			arduboy.print("PM");
-		}
-
-		alarmClock = CreateDisplayText(sA, mA, hA, false, false, false);
-		ardTiny.setCursor(14, 57);
+		//alarmClock = CreateDisplayText(sA, mA, hA, false, false, false);
+		//ardTiny.setCursor(14, 57);
 		if (ampmA)
 		{
-			ardTiny.print(alarmClock + "A");
+			PrintTinyText(14, 57, alarmClock + "A");
+			//ardTiny.print(alarmClock + "A");
 		}
 		else
 		{
-			ardTiny.print(alarmClock + "P");
+			PrintTinyText(14, 57, alarmClock + "P");
+			//ardTiny.print(alarmClock + "P");
 		}
 	}
 	else
 	{
-		alarmClock = CreateDisplayText(sA, mA, hA, false, false, false);
-		ardTiny.setCursor(14, 57);
+		PrintTinyText(14, 57, alarmClock);
+		//alarmClock = CreateDisplayText(sA, mA, hA, false, false, false);
+		//ardTiny.setCursor(14, 57);
+		/*
 		if (ampmA)
 		{
 			ardTiny.print(alarmClock);
@@ -1397,14 +1385,23 @@ void DisplayMain()
 		{
 			ardTiny.print(alarmClock);
 		}
+		*/
 	}
 	timerClock = CreateDisplayText(sT, mT, hT, false, true, false);
+	PrintTinyText(70, 57, timerClock);
+	/*
 	ardTiny.setCursor(70, 57);
 	ardTiny.print(timerClock);
-	
+	*/
+
 	if (ardtune.playing())
 	{
 		// Left border
+		PrintTinyText(02, 22, "M");
+		PrintTinyText(02, 27, "U");
+		PrintTinyText(02, 32, "T");
+		PrintTinyText(02, 37, "E");
+		/*
 		ardTiny.setCursor(02, 22);
 		ardTiny.print("M");
 		ardTiny.setCursor(02, 27);
@@ -1413,8 +1410,15 @@ void DisplayMain()
 		ardTiny.print("T");
 		ardTiny.setCursor(02, 37);
 		ardTiny.print("E");
+		*/
 
 		// Left border
+		PrintTinyText(122, 22, "M");
+		PrintTinyText(122, 27, "U");
+		PrintTinyText(122, 32, "T");
+		PrintTinyText(122, 37, "E");
+
+		/*
 		ardTiny.setCursor(122, 22);
 		ardTiny.print("M");
 		ardTiny.setCursor(122, 27);
@@ -1423,6 +1427,7 @@ void DisplayMain()
 		ardTiny.print("T");
 		ardTiny.setCursor(122, 37);
 		ardTiny.print("E");
+		*/
 	}
 }
 
@@ -1430,37 +1435,27 @@ void DisplayMain()
 void DisplayAlarm()
 {
 	DrawFrame();
-	ardTiny.setCursor(15, 2);
-	ardTiny.print("ALARM");
-	ardTiny.setCursor(90, 2);
-	ardTiny.print("TIMER");
-
+	PrintTinyText(34, 57, "ALARM");
+	PrintTinyText(70, 57, "SETTING");
+	/*
 	ardTiny.setCursor(34, 57);
 	ardTiny.print("ALARM");
 	ardTiny.setCursor(70, 57);
 	ardTiny.print("SETTING");
+	*/
 
-	// Display Timer if running
-	if (timerOnSetting)
-	{
-		arduboy.setCursor(74, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-
-	}
-	else
-	{
-		arduboy.setCursor(71, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
-	}
 	// Display Alarm if its ON
 	if (alarmOnSetting)
 	{
-		arduboy.setCursor(44, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
 		// Left border
+		PrintTinyText(02, 14, "T");
+		PrintTinyText(02, 19, "U");
+		PrintTinyText(02, 24, "R");
+		PrintTinyText(02, 29, "N");
+		PrintTinyText(02, 36, "O");
+		PrintTinyText(02, 41, "F");
+		PrintTinyText(02, 46, "F");
+		/*
 		ardTiny.setCursor(02, 14);
 		ardTiny.print("T");
 		ardTiny.setCursor(02, 19);
@@ -1475,13 +1470,18 @@ void DisplayAlarm()
 		ardTiny.print("F");
 		ardTiny.setCursor(02, 46);
 		ardTiny.print("F");
+		*/
 	}
 	else
 	{
-		arduboy.setCursor(41, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
 		// Left border
+		PrintTinyText(02, 14, "T");
+		PrintTinyText(02, 19, "U");
+		PrintTinyText(02, 24, "R");
+		PrintTinyText(02, 29, "N");
+		PrintTinyText(02, 36, "O");
+		PrintTinyText(02, 41, "N");
+		/*
 		ardTiny.setCursor(02, 14);
 		ardTiny.print("T");
 		ardTiny.setCursor(02, 19);
@@ -1494,6 +1494,7 @@ void DisplayAlarm()
 		ardTiny.print("O");
 		ardTiny.setCursor(02, 41);
 		ardTiny.print("N");
+		*/
 	}
 	
 	
@@ -1554,24 +1555,24 @@ void DisplayAlarm()
 void DisplayTimer()
 {	
 	DrawFrame();
-	ardTiny.setCursor(15, 2);
-	ardTiny.print("ALARM");
-	ardTiny.setCursor(90, 2);
-	ardTiny.print("TIMER");
-
+	PrintTinyText(34, 57, "TIMER");
+	PrintTinyText(70, 57, "SETTING");
+	/*
 	ardTiny.setCursor(34, 57);
 	ardTiny.print("TIMER");
 	ardTiny.setCursor(70, 57);
 	ardTiny.print("SETTING");
+	*/
 
 	// Display Timer if running
 	if (timerOnSetting)
 	{
-		arduboy.setCursor(74, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-
 		// Right border
+		PrintTinyText(122, 22, "S");
+		PrintTinyText(122, 27, "T");
+		PrintTinyText(122, 32, "O");
+		PrintTinyText(122, 37, "P");
+		/*
 		ardTiny.setCursor(122, 22);
 		ardTiny.print("S");
 		ardTiny.setCursor(122, 27);
@@ -1580,13 +1581,17 @@ void DisplayTimer()
 		ardTiny.print("O");
 		ardTiny.setCursor(122, 37);
 		ardTiny.print("P");
+		*/
 	}
 	else
 	{
-		arduboy.setCursor(71, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
 		// Left border
+		PrintTinyText(02, 20, "R");
+		PrintTinyText(02, 25, "E");
+		PrintTinyText(02, 30, "S");
+		PrintTinyText(02, 35, "E");
+		PrintTinyText(02, 40, "T");
+		/*
 		ardTiny.setCursor(02, 20);
 		ardTiny.print("R");
 		ardTiny.setCursor(02, 25);
@@ -1597,7 +1602,14 @@ void DisplayTimer()
 		ardTiny.print("E");
 		ardTiny.setCursor(02, 40);
 		ardTiny.print("T");
+		*/
 		// Right border
+		PrintTinyText(122, 20, "S");
+		PrintTinyText(122, 25, "T");
+		PrintTinyText(122, 30, "A");
+		PrintTinyText(122, 35, "R");
+		PrintTinyText(122, 40, "T");
+		/*
 		ardTiny.setCursor(122, 20);
 		ardTiny.print("S");
 		ardTiny.setCursor(122, 25);
@@ -1608,21 +1620,9 @@ void DisplayTimer()
 		ardTiny.print("R");
 		ardTiny.setCursor(122, 40);
 		ardTiny.print("T");
+		*/
 	}
-	// Display Alarm if its ON
-	if (alarmOnSetting)
-	{
-		arduboy.setCursor(44, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-	}
-	else
-	{
-		arduboy.setCursor(41, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
-	}
-
+	
 	if (!timerOnSetting)
 	{
 		arrD = AdjustTime(sT, mT, hT, false, true);	// Call funtion to change time if user choose to
@@ -1684,6 +1684,7 @@ void ResetButtonHeldCounter()
 		timerSetting = false;
 		alarmSetting = false;
 		screenSaverSetting = false;
+		faceTypeSetting = false;
 		
 		returnCount = 0;	// Reset the 
 	}
@@ -1702,6 +1703,45 @@ void ResetReturnCount()
 void DrawFrame() 
 {
 	ardbitmap.drawBitmap(64, 32, FRAME, 128, 64, WHITE, ALIGN_CENTER, MIRROR_NONE);
+
+	PrintTinyText(15, 2, "ALARM");
+	PrintTinyText(90, 2, "TIMER");
+	/*
+	ardTiny.setCursor(15, 2);
+	ardTiny.print("ALARM");
+	ardTiny.setCursor(90, 2);
+	ardTiny.print("TIMER");
+	*/
+
+	// Display Timer if running
+	if (timerOnSetting)
+	{
+		arduboy.setCursor(74, 2);
+		arduboy.setTextSize(1);
+		arduboy.print("ON");
+	}
+	// Display how to access Timer screen
+	else
+	{
+		arduboy.setCursor(71, 2);
+		arduboy.setTextSize(1);
+		arduboy.print("OFF");
+	}
+
+	// Display Alarm if its ON
+	if (alarmOnSetting)
+	{
+		arduboy.setCursor(44, 2);
+		arduboy.setTextSize(1);
+		arduboy.print("ON");
+	}
+	// display how to access Alarm screen
+	else
+	{
+		arduboy.setCursor(41, 2);
+		arduboy.setTextSize(1);
+		arduboy.print("OFF");
+	}
 }
 
 void ResetTimer()
@@ -1717,39 +1757,13 @@ void ResetTimer()
 void DisplayPong()
 {
 	DrawFrame();
-	ardTiny.setCursor(15, 2);
-	ardTiny.print("ALARM");
-	ardTiny.setCursor(90, 2);
-	ardTiny.print("TIMER");
-	// Display Timer if running
-	if (timerOnSetting)
-	{
-		arduboy.setCursor(74, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-
-	}
-	else
-	{
-		arduboy.setCursor(71, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
-	}
-	// Display Alarm if its ON
-	if (alarmOnSetting)
-	{
-		arduboy.setCursor(44, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("ON");
-	}
-	else
-	{
-		arduboy.setCursor(41, 2); // +3 ON
-		arduboy.setTextSize(1);
-		arduboy.print("OFF");
-	}
-
+	
 	// Left border
+	PrintTinyText(02, 22, "P");
+	PrintTinyText(02, 27, "O");
+	PrintTinyText(02, 32, "N");
+	PrintTinyText(02, 37, "G");
+	/*
 	ardTiny.setCursor(02, 22);
 	ardTiny.print("P");
 	ardTiny.setCursor(02, 27);
@@ -1758,8 +1772,15 @@ void DisplayPong()
 	ardTiny.print("N");
 	ardTiny.setCursor(02, 37);
 	ardTiny.print("G");
+	*/
 
 	// Right border
+	PrintTinyText(12, 20, "B");
+	PrintTinyText(12, 25, "L");
+	PrintTinyText(12, 30, "A");
+	PrintTinyText(12, 35, "N");
+	PrintTinyText(12, 40, "K");
+	/*
 	ardTiny.setCursor(122, 20);
 	ardTiny.print("B");
 	ardTiny.setCursor(122, 25);
@@ -1770,16 +1791,24 @@ void DisplayPong()
 	ardTiny.print("N");
 	ardTiny.setCursor(122, 40);
 	ardTiny.print("K");
+	*/
 
 	// Bottom
+	PrintTinyText(29, 57, "SCREEN");
+	PrintTinyText(70, 57, "SAVER");
+	/*
 	ardTiny.setCursor(29, 57);
 	ardTiny.print("SCREEN");
 	ardTiny.setCursor(70, 57);
 	ardTiny.print("SAVER");
+	*/
 
 	// Top 
+	PrintTinyText(37, 14, "30SEC DELAY");
+	/*
 	ardTiny.setCursor(37, 14);
 	ardTiny.print("30SEC DELAY");
+	*/
 	if (!screenSaverType)
 	{
 		arduboy.drawFastHLine(40, 18, 47, WHITE);
@@ -1789,11 +1818,14 @@ void DisplayPong()
 		arduboy.drawFastVLine(42, 23, 6, WHITE);
 		arduboy.drawFastVLine(85, 39, 6, WHITE);
 		arduboy.drawCircle(63, 32, 1, WHITE);
+		PrintTinyText(52, 20, "12:00");
+		PrintTinyText(55, 43, "PONG");
+		/*
 		ardTiny.setCursor(52, 20);
 		ardTiny.print("12:00");
 		ardTiny.setCursor(55, 43);
 		ardTiny.print("PONG");
-		
+		*/
 	}
 	else
 	{
@@ -1801,8 +1833,11 @@ void DisplayPong()
 		arduboy.drawFastVLine(40, 18, 31, WHITE);
 		arduboy.drawFastHLine(40, 49, 47, WHITE);
 		arduboy.drawFastVLine(87, 18, 31, WHITE);
+		PrintTinyText(52, 32, "BLANK");
+		/*
 		ardTiny.setCursor(52, 32);
 		ardTiny.print("BLANK");
+		*/
 	}
 
 	if (arduboy.pressed(A_BUTTON) && SingleButton("A") && buttonHeld)
@@ -1812,13 +1847,19 @@ void DisplayPong()
 	}
 	if (ssONOFF)
 	{
+		PrintTinyText(98, 57, "ON");
+		/*
 		ardTiny.setCursor(98, 57);
 		ardTiny.print("ON");
+		*/
 	}
 	else
 	{
+		PrintTinyText(98, 57, "OFF");
+		/*
 		ardTiny.setCursor(98, 57);
 		ardTiny.print("OFF");
+		*/
 	}
 	
 }
@@ -2069,4 +2110,177 @@ void DrawPlayArea()
 	arduboy.drawCircle(-1, HEIGHT / 2 - 1, HEIGHT / 2, WHITE);
 	arduboy.drawCircle(WIDTH + 1, HEIGHT / 2 - 1, HEIGHT / 2, WHITE);
 
+}
+
+void DisplayFaceType()
+{
+	DrawFrame();
+
+	PrintTinyText(39, 57, "FACE");
+	PrintTinyText(70, 57, "TYPE");
+	/*
+	ardTiny.setCursor(39, 57);
+	ardTiny.print("FACE");
+	ardTiny.setCursor(70, 57);
+	ardTiny.print("TYPE");
+	*/
+
+	// Left border
+	PrintTinyText(02, 15, "D");
+	PrintTinyText(02, 20, "I");
+	PrintTinyText(02, 25, "G");
+	PrintTinyText(02, 30, "I");
+	PrintTinyText(02, 35, "T");
+	PrintTinyText(02, 40, "A");
+	PrintTinyText(02, 45, "L");
+	/*
+	ardTiny.setCursor(02, 15);
+	ardTiny.print("D");
+	ardTiny.setCursor(02, 20);
+	ardTiny.print("I");
+	ardTiny.setCursor(02, 25);
+	ardTiny.print("G");
+	ardTiny.setCursor(02, 30);
+	ardTiny.print("I");
+	ardTiny.setCursor(02, 35);
+	ardTiny.print("T");
+	ardTiny.setCursor(02, 40);
+	ardTiny.print("A");
+	ardTiny.setCursor(02, 45);
+	ardTiny.print("L");
+	*/
+
+	// Right border
+	PrintTinyText(122, 17, "A");
+	PrintTinyText(122, 22, "N");
+	PrintTinyText(122, 27, "A");
+	PrintTinyText(122, 32, "L");
+	PrintTinyText(122, 37, "O");
+	PrintTinyText(122, 42, "G");
+	/*
+	ardTiny.setCursor(122, 17);
+	ardTiny.print("A");
+	ardTiny.setCursor(122, 22);
+	ardTiny.print("N");
+	ardTiny.setCursor(122, 27);
+	ardTiny.print("A");
+	ardTiny.setCursor(122, 32);
+	ardTiny.print("L");
+	ardTiny.setCursor(122, 37);
+	ardTiny.print("O");
+	ardTiny.setCursor(122, 42);
+	ardTiny.print("G");
+	*/
+	DrawClock();
+	
+}
+
+void DrawClock()
+{
+	if (!faceType)
+	{
+		PrintTinyText(55, 13, "TIME");
+		/*
+		ardTiny.setCursor(55, 13);
+		ardTiny.print("TIME");
+		*/
+
+		if (clockType)
+		{
+			if (ampm)
+			{
+				arduboy.setCursor(59, 44); // +3 ON
+				arduboy.setTextSize(1);
+				arduboy.print("AM");
+			}
+			else
+			{
+				arduboy.setCursor(59, 44); // +3 ON
+				arduboy.setTextSize(1);
+				arduboy.print("PM");
+			}
+		}
+		arduboy.setTextSize(2);	// Increase font size
+		arduboy.setCursor(17, 25);	// Set location for clock
+		clockText = CreateDisplayText(s, m, h, true, false, false);	// Add to display buffer by calling function to create the time text
+		arduboy.print(clockText); // Print clock
+	}
+	/*
+	else
+	{
+		
+		// Seconds Hand
+		DrawClockHands(64, 31, 16, 19, s, 6, true, 0);
+		DrawClockHands(64, 31, 15, 15, s, 6, false, 1);
+		
+		//arduboy.drawLine(64 + 16 * cosf((s * 6 - 90)*PI / 180), 31 + 16 * sinf((s * 6 - 90)*PI / 180), 64 + 19 * cosf((s * 6 - 90)*PI / 180), 31 + 19 * sinf((s * 6 - 90)*PI / 180), 1);
+		//arduboy.drawCircle(64 + 15 * cosf((s * 6 - 90)*PI / 180), 31 + 15 * sinf((s * 6 - 90)*PI / 180), 1);
+		
+		// Minutes Hand
+		DrawClockHands(64, 31, 0, 16, m, 6, true, 0);
+
+		//arduboy.drawLine(64, 31, 64 + 16 * cosf((m * 6 - 90)*PI / 180), 31 + 16 * sinf((m * 6 - 90)*PI / 180), 1);
+		arduboy.drawTriangle(64 + 16 * cosf((m * 6 - 90)*PI / 180), 31 + 16 * sinf((m * 6 - 90)*PI / 180),
+			64 + 13 * cosf((m * 6 - 98)*PI / 180), 31 + 13 * sinf((m * 6 - 98)*PI / 180),
+			64 + 13 * cosf((m * 6 - 82)*PI / 180), 31 + 13 * sinf((m * 6 - 82)*PI / 180));
+		// Hours Hand
+		DrawClockHands(64, 31, 0, 10, h, 6, true, 0);
+		//arduboy.drawLine(64, 31, 64 + 10 * cosf((h * 30 - 90)*PI / 180), 31 + 10 * sinf((h * 30 - 90)*PI / 180), 1);
+		arduboy.drawTriangle(64 + 10 * cosf((h * 30 - 90)*PI / 180), 31 + 10 * sinf((h * 30 - 90)*PI / 180),
+			64 + 7 * cosf((h * 30 - 105)*PI / 180), 31 + 7 * sinf((h * 30 - 105)*PI / 180),
+			64 + 7 * cosf((h * 30 - 75)*PI / 180), 31 + 7 * sinf((h * 30 - 75)*PI / 180));
+		// Millisecond Dial
+		if (s % 2 == 0)
+		{
+			DrawClockHands(101, 31, 0, 0, 0, 0, false, 2);
+			//arduboy.drawCircle(101, 31, 2);
+		}
+		else
+		{
+			DrawClockHands(101, 31, 0, 0, 0, 0, false, 3);
+			//arduboy.drawCircle(101, 31, 3);
+		}
+		DrawClockHands(101, 31, 0, 0, 0, 0, false, 7);
+		arduboy.drawCircle(101, 31, 7);
+		//arduboy.drawLine(101 + 0 * cosf((mils * 36 - 90)*PI / 180), 31 + 0 * sinf((mils * 36 - 90)*PI / 180), 101 + 7 * cosf((mils * 36 - 90)*PI / 180), 31 + 7 * sinf((mils * 36 - 90)*PI / 180), 1);
+		// Analong frame
+		for (int i = 1; i < 13; i++)
+		{
+			ardTiny.setCursor(64 - 2 + 18 * cosf((i * 30 - 90)*PI / 180), 31 - 2 + 18 * sinf((i * 30 - 90)*PI / 180));
+			if (i == 12)
+			{
+				//ardTiny.setCursor(64 - 5 + 18 * cosf((i * 30 - 90)*PI / 180), 31 - 2 + 18 * sinf((i * 30 - 90)*PI / 180));
+				PrintTinyText(64 - 5 + 18 * cosf((i * 30 - 90)*PI / 180), 31 - 2 + 18 * sinf((i * 30 - 90)*PI / 180), i + "");
+			}
+			else if (i == 3 || i == 6 || i == 9)
+			{
+				PrintTinyText(64 - 2 + 18 * cosf((i * 30 - 90)*PI / 180), 31 - 2 + 18 * sinf((i * 30 - 90)*PI / 180), i + "");
+				//ardTiny.print(i);
+			}
+			else
+			{
+				DrawClockHands(64, 31, 17, 19, i, 30, true, 0);
+				//arduboy.drawLine(64 + 17 * cosf((i * 30 - 90)*PI / 180), 31 + 17 * sinf((i * 30 - 90)*PI / 180), 64 + 19 * cosf((i * 30 - 90)*PI / 180), 31 + 19 * sinf((i * 30 - 90)*PI / 180), 1);
+			}
+		}
+	}
+	*/
+}
+
+void PrintTinyText(int x, int y, String text) 
+{
+	ardTiny.setCursor(x, y);
+	ardTiny.print(text);
+}
+
+void DrawClockHands(int x, int y, int l1, int l2, int v, int d, bool LOrC, int r)
+{
+	if (LOrC)
+	{
+		arduboy.drawLine(x + l1 *cosf((v * d - 90)*PI / 180), y + l1 *sinf((v * d - 90)*PI / 180), x + l2 *cosf((v * d - 90)*PI / 180), y + l2 *sinf((v*d - 90)*PI / 180), 1);
+	}
+	else
+	{
+		arduboy.drawCircle(x + l1 * cosf((v * d - 90)*PI / 180), y + l1 * sinf((v * d - 90)*PI / 180), r);
+	}
 }
