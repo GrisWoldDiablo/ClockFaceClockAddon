@@ -496,7 +496,7 @@ void clock()
 
 	// Turn over clock 
 	// If the clock is set to 24h, turns the clock over once the hour hits 24.
-	if (h == 24 && m == 0 && s == 0 && !clockType && sc == frameRate)
+	if (h == 24 && m == 0 && s == 0 && !clockType /*&& sc == frameRate*/)
 	{
 		h = 0;	// Set hours to 0
 		ampm = true;	// Set the clock to AM
